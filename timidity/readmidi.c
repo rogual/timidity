@@ -4427,9 +4427,14 @@ static int read_smf_file(struct timidity_file *tf)
 
     if(divisions_tmp < 0)
     {
-	/* SMPTE time -- totally untested. Got a MIDI file that uses this? */
-	divisions=
-	    (int32)(-(divisions_tmp / 256)) * (int32)(divisions_tmp & 0xFF);
+	/* SMPTE time */
+        int32 ticks_per_second =
+	    (int32)((-divisions_tmp >> 8) + 1) * (int32)(divisions_tmp & 0xFF);
+
+        /* 120BPM = 2 beats per second.
+           TODO: We're assuming that the tempo will remain at 120BPM for the whole 
+           track. This is the default, but SetTempo will mess us up. */
+	divisions = ticks_per_second / 2;
     }
     else
 	divisions = (int32)divisions_tmp;
